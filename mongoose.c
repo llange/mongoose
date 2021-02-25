@@ -4635,6 +4635,11 @@ static enum mg_ssl_if_result mg_use_ca_cert(SSL_CTX *ctx, const char *cert) {
     return MG_SSL_OK;
   }
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
+  const unsigned char* ucert = (const unsigned char*)cert;
+  long sz = strlen(cert);
+  if (strncmp(cert,"-----",5) == 0)
+      return wolfSSL_CTX_load_verify_buffer(ctx, ucert, sz, SSL_FILETYPE_PEM) == 1 ?
+	  MG_SSL_OK : MG_SSL_ERROR;
   return SSL_CTX_load_verify_locations(ctx, cert, NULL) == 1 ? MG_SSL_OK
                                                              : MG_SSL_ERROR;
 }
